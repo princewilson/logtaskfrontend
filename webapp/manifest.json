@@ -1,0 +1,92 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "LogTask",
+        "type": "application",
+        "i18n": {
+            "bundleName": "LogTask.i18n.i18n",
+            "supportedLocales": [
+                ""
+            ],
+            "fallbackLocale": ""
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "applicationVersion": {
+            "version": "1.0.0"
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "dependencies": {
+            "minUI5Version": "1.120",
+            "libs": {
+                "sap.ui.core": {},
+                "sap.m": {}
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "type": "View",
+                "viewType": "XML",
+                "path": "LogTask.view",
+                "controlId": "app",
+                "controlAggregation": "content"
+            },
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "login",
+                    "target": "login"
+                },
+                {
+                    "pattern": "home",
+                    "name": "home",
+                    "target": "home"
+                }
+            ],
+            "targets": {
+                "login": {
+                    "id": "login",
+                    "name": "Login"
+                },
+                "home": {
+                    "id": "home",
+                    "name": "Home"
+                }
+            }
+        },
+        "rootView": {
+            "viewName": "LogTask.view.App",
+            "type": "XML",
+            "id": "app"
+        },
+        "resources": {
+            "css": [
+                {
+                    "uri": "css/style.css"
+                }
+            ]
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "LogTask.i18n.i18n",
+                    "supportedLocales": [
+                        ""
+                    ],
+                    "fallbackLocale": ""
+                }
+            }
+        }
+    }
+}
