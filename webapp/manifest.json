@@ -39,7 +39,10 @@
                 "viewType": "XML",
                 "path": "LogTask.view",
                 "controlId": "app",
-                "controlAggregation": "content"
+                "controlAggregation": "pages",
+                "bypassed": {
+                    "target": "notFound"
+                }
             },
             "routes": [
                 {
@@ -61,6 +64,11 @@
                 "home": {
                     "id": "home",
                     "name": "Home"
+                },
+                "notFound": {
+                    "id": "notFound",
+                    "name": "NotFound",
+                    "transition": "show"
                 }
             }
         },

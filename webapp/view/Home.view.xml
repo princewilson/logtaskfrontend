@@ -4,7 +4,11 @@
 	xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core">
 
-    <GenericTile header="Goals" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
-    <GenericTile header="Today's Tasks" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
-    
+    <Page>
+        <content>
+            <GenericTile header="Goals" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
+            <GenericTile header="Today's Tasks" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
+        </content>        
+    </Page>
+        
 </mvc:View>

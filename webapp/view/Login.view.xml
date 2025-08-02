@@ -3,9 +3,15 @@
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core">
-
-    <VBox>
-        <core:HTML id="clerkContainer" content="&lt;div id='clerk-root'&gt;&lt;/div&gt;"/>
-    </VBox>
-  
+    
+    <Page>
+        <content>
+            <VBox>
+                <items>
+                    <core:HTML id="clerkContainer" content="&lt;div id='clerk-root'&gt;&lt;/div&gt;"/>
+                </items>                
+            </VBox>
+        </content>        
+    </Page>
+          
 </mvc:View>

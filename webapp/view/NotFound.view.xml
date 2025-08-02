@@ -1,0 +1,22 @@
+<mvc:View
+	controllerName="LogTask.controller.NotFound"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core">
+
+    <Page>
+        <content>
+            <VBox
+                class="sapUiSmallMargin"
+                justifyContent="Center"
+                alignItems="Center">
+
+                <items>
+                    <Text text="The requested resource was not found." class="sapUiResponsiveMargin" />
+                    <Button text="Home Page" press="onClickHome" />
+                </items>                        
+            </VBox>
+        </content>        
+    </Page>
+    
+</mvc:View>

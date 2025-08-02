@@ -3,13 +3,21 @@ import UIComponent from "sap/ui/core/UIComponent";
 import { CLERK_SIGN_IN_FALLBACK_REDIRECT_URL } from '../constants';
 import { CLERK_AFTER_SIGNOUT_URL } from '../constants';
 import JSONModel from "sap/ui/model/json/JSONModel";
+import ManagedObject from "sap/ui/base/ManagedObject";
+import Page from "sap/m/Page";
+import Title from "sap/m/Title";
+import Bar from "sap/m/Bar";
+import HTML from "sap/ui/core/HTML";
+import FlexItemData from "sap/m/FlexItemData";
 
 /**
  * @name LogTask.controller.Base
  */
 export default class BaseController extends Controller {
     onInit(): void | undefined {
-        this.ensureAuthenticated().then((authenticated: boolean) => {
+        const oController = this;
+        oController.appendHeader();
+        oController.ensureAuthenticated().then((authenticated: boolean) => {
             if (authenticated) {
                 console.log("User Authenticated");
             } else {
@@ -17,6 +25,13 @@ export default class BaseController extends Controller {
             }
         });
     }
+
+    onAfterRendering(): void | undefined {
+        window.ClerkReady.then(() => {
+            this._renderClerkComponent();
+        });
+    }
+
     protected async ensureAuthenticated(): Promise<boolean> {
         if (!window.ClerkReady) {
             console.error("ClerkReady Promise not found");
@@ -31,12 +46,6 @@ export default class BaseController extends Controller {
         }
 
         return true;
-    }
-
-    onAfterRendering(): void | undefined {
-        window.ClerkReady.then(() => {
-            this._renderClerkComponent();
-        });
     }
 
     _renderClerkComponent(): void {
@@ -90,6 +99,43 @@ export default class BaseController extends Controller {
         const oModel = oController.getOwnerComponent()?.getModel() as JSONModel;
         if (oModel) {
             oModel.setProperty("/headerTitle", title);
+        }
+    }
+
+    appendHeader(): void {
+        const oController = this;
+        const content = oController.getView()?.getAggregation("content") as ManagedObject[];
+        if (content && content.length && content[0] instanceof Page) {
+            const page = content[0] as Page;
+            const customHeader = page.getCustomHeader();
+            if (!customHeader) {
+                page.setCustomHeader(
+                    new Bar({
+                        design: "Header",
+                        enableFlexBox: true,
+                        contentLeft: [
+                            new Title({
+                                text: "LogTask",
+                                level: "H6"
+                            })
+                        ],
+                        contentMiddle: [
+                            new Title({
+                                text: "{/headerTitle}",
+                                layoutData: new FlexItemData({
+                                    alignSelf: "Baseline",
+                                    growFactor: 1
+                                })
+                            })
+                        ],
+                        contentRight: [
+                            new HTML({
+                                content: "<div id='clerk-user'></div>;"
+                            })
+                        ]
+                    })
+                );
+            }
         }
     }
 };
