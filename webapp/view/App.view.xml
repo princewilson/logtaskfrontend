@@ -5,28 +5,6 @@
 	xmlns:core="sap.ui.core"
 	displayBlock="true">
 	<Shell>
-		<App>
-			 <pages>
-			 	<Page id="app">
-					<customHeader>
-						<Bar design="Header" enableFlexBox="true">
-							<contentLeft>																
-								<Title text="LogTask" titleStyle="H6"/>
-							</contentLeft>
-							<contentMiddle>
-								<Title text="{/headerTitle}">
-									<layoutData>
-										<FlexItemData alignSelf="Baseline" growFactor="1"  />
-									</layoutData>
-								</Title>								
-							</contentMiddle>
-							<contentRight>
-								<core:HTML id="userButton" content="&lt;div id='clerk-user'&gt;&lt;/div&gt;"/>
-							</contentRight>
-						</Bar>
-					</customHeader>
-				</Page>
-			 </pages>
-		</App>
+		<App id="app" />
 	</Shell>
 </mvc:View>
