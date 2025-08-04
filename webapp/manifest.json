@@ -40,6 +40,7 @@
                 "path": "LogTask.view",
                 "controlId": "app",
                 "controlAggregation": "pages",
+                "transition": "slide",
                 "bypassed": {
                     "target": "notFound"
                 }
@@ -63,7 +64,8 @@
                 },
                 "home": {
                     "id": "home",
-                    "name": "Home"
+                    "name": "Home",
+                    "level": 1
                 },
                 "notFound": {
                     "id": "notFound",
