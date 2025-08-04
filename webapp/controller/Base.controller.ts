@@ -9,7 +9,8 @@ import Title from "sap/m/Title";
 import Bar from "sap/m/Bar";
 import HTML from "sap/ui/core/HTML";
 import FlexItemData from "sap/m/FlexItemData";
-
+import Button from "sap/m/Button";
+import History from "sap/ui/core/routing/History";
 /**
  * @name LogTask.controller.Base
  */
@@ -114,6 +115,10 @@ export default class BaseController extends Controller {
                         design: "Header",
                         enableFlexBox: true,
                         contentLeft: [
+                            new Button({
+                                type: "Back",
+                                press: oController.onNavBack
+                            }),
                             new Title({
                                 text: "LogTask",
                                 level: "H6"
@@ -136,6 +141,22 @@ export default class BaseController extends Controller {
                     })
                 );
             }
+        }
+    }
+    getRouter() {
+        return UIComponent.getRouterFor(this);
+    }
+    onNavBack(): void {
+        let oController = this;
+        let oHistory, sPreviousHash;
+
+        oHistory = History.getInstance();
+        sPreviousHash = oHistory.getPreviousHash();
+
+        if (sPreviousHash !== undefined) {
+            window.history.go(-1);
+        } else {
+            oController.getRouter().navTo("home", {}, true /*no history*/);
         }
     }
 };
