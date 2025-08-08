@@ -10,12 +10,9 @@
 		type="text/javascript">
 		</script>
 	<script>
-		window.ClerkReady = new Promise((resolve) => {
-			window.addEventListener('load', async () => {
-				await Clerk.load();
-				resolve();
-			});
-		});
+		window.addEventListener('load', async () => {
+			await Clerk.load();
+		});		
 	</script>
 	<script id="sap-ui-bootstrap" src="resources/sap-ui-core.js" data-sap-ui-theme="sap_horizon"
 		data-sap-ui-compat-version="edge" data-sap-ui-async="true"

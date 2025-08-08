@@ -16,29 +16,18 @@ import History from "sap/ui/core/routing/History";
  */
 export default class BaseController extends Controller {
     onInit(): void | undefined {
-        const oController = this;
-        oController.appendHeader();
-        oController.ensureAuthenticated().then((authenticated: boolean) => {
-            if (authenticated) {
-                console.log("User Authenticated");
-            } else {
-                console.log("Authentication failed");
-            }
-        });
+        console.log("BaseController initialized");
     }
-
+    onBeforeRendering(): void | undefined {
+        console.log("BaseController preparing view");
+    }
     onAfterRendering(): void | undefined {
-        window.ClerkReady.then(() => {
-            this._renderClerkComponent();
-        });
+        console.log("BaseController after rendering");
     }
-
+    onExit(): void | undefined {
+        console.log("BaseController exited");
+    }
     protected async ensureAuthenticated(): Promise<boolean> {
-        if (!window.ClerkReady) {
-            console.error("ClerkReady Promise not found");
-            return false;
-        }
-
         const router = UIComponent.getRouterFor(this);
 
         if (!window.Clerk?.user) {
@@ -54,43 +43,47 @@ export default class BaseController extends Controller {
             console.error("ClerkJS is not loaded");
             return;
         }
-
+        const router = UIComponent.getRouterFor(this);
 
         if (window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
-            // If already signed in, redirect to home page
-            const router = UIComponent.getRouterFor(this);
-            router.navTo("home");
-
+            // If already signed in, redirect to home page            
             const user = document.getElementById("clerk-user");
             if (!user) {
-                console.error("Could not find Clerk root element");
+                console.info("Could not find Clerk root element");
                 return;
             }
 
-            if (!user.innerHTML) {
-                const div = document.createElement("div");
-                user.appendChild(div);
+            user.innerHTML = ""; // Clear previous content;
+            const div = document.createElement("div");
+            user.appendChild(div);
+
+            // sometimes, the Clerk component takes time to load, so we use setTimeout
+            setTimeout(() => {
+                // Mount the user button
                 window.Clerk.mountUserButton(div, {
                     afterSignOutUrl: CLERK_AFTER_SIGNOUT_URL
                 });
-            }
+            }, 1000);
         } else {
             // Else, show sign-in form        
-
             const root = document.getElementById("clerk-root");
 
-            if (!root) {
-                console.error("Could not find Clerk root element");
-                return;
-            }
-
-            if (!root.innerHTML) {
+            // If root element exists, that means we are already in login page
+            if (root) {
+                root.innerHTML = "";
                 const div = document.createElement("div");
                 root.appendChild(div);
-                window.Clerk.mountSignIn(div, {
-                    routing: 'hash',
-                    fallbackRedirectUrl: CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
-                });
+
+                // sometimes, the Clerk component takes time to load, so we use setTimeout
+                setTimeout(() => {
+                    // Mount the sign-in form
+                    window.Clerk.mountSignIn(div, {
+                        routing: 'hash',
+                        fallbackRedirectUrl: CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+                    });
+                }, 1000);
+            } else {
+                router.navTo("login");
             }
         }
     }
@@ -156,7 +149,7 @@ export default class BaseController extends Controller {
         if (sPreviousHash !== undefined) {
             window.history.go(-1);
         } else {
-            oController.getRouter().navTo("home", {}, true /*no history*/);
+            oController.getRouter()?.navTo("home", {}, true /*no history*/);
         }
     }
 };

@@ -1,10 +1,9 @@
 import { ClerkObject } from "./clerk";
 
-export {};
+export { };
 
-declare global {  
+declare global {
   interface Window {
     Clerk: ClerkObject;
-    ClerkReady: Promise<void>;
   }
 }
