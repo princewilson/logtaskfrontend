@@ -11,12 +11,20 @@ import HTML from "sap/ui/core/HTML";
 import FlexItemData from "sap/m/FlexItemData";
 import Button from "sap/m/Button";
 import History from "sap/ui/core/routing/History";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
 /**
  * @name LogTask.controller.Base
  */
 export default class BaseController extends Controller {
     onInit(): void | undefined {
         console.log("BaseController initialized");
+        const oController = this;
+        // set i18n model on view
+        const i18nModel = new ResourceModel({
+            bundleName: "LogTask.i18n.i18n"
+        });
+        oController.getView()?.setModel(i18nModel, "i18n");
     }
     onBeforeRendering(): void | undefined {
         console.log("BaseController preparing view");
@@ -88,11 +96,12 @@ export default class BaseController extends Controller {
         }
     }
 
-    setHeaderTitle(title: string): void {
+    setHeaderTitle(i18nTitle: string): void {
         const oController = this;
         const oModel = oController.getOwnerComponent()?.getModel() as JSONModel;
+        const resourceBundle = (this.getView()?.getModel("i18n") as ResourceModel)?.getResourceBundle() as ResourceBundle;
         if (oModel) {
-            oModel.setProperty("/headerTitle", title);
+            oModel.setProperty("/headerTitle", resourceBundle.getText(i18nTitle));
         }
     }
 
@@ -113,7 +122,7 @@ export default class BaseController extends Controller {
                                 press: oController.onNavBack
                             }),
                             new Title({
-                                text: "LogTask",
+                                text: "{i18n>headerTitle}",
                                 level: "H6"
                             })
                         ],

@@ -12,8 +12,8 @@
                 alignItems="Center">
 
                 <items>
-                    <Text text="The requested resource was not found." class="sapUiResponsiveMargin" />
-                    <Button text="Home Page" press="onClickHome" />
+                    <Text text="{i18n>notFoundText}" class="sapUiResponsiveMargin" />
+                    <Button text="{i18n>navHomePageButtonText}" press="onClickHome" />
                 </items>                        
             </VBox>
         </content>        

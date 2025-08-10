@@ -19,7 +19,7 @@ export default class HomeController extends BaseController {
     _onRouteMatched(): void {
         const oController = this;
         oController.appendHeader();
-        oController.setHeaderTitle("Home Page");
+        oController.setHeaderTitle("homePageTitle"); // Assuming "homePageTitle" is defined in i18n
         oController._renderClerkComponent();
     }
 

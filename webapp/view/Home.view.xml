@@ -6,8 +6,8 @@
 
     <Page>
         <content>
-            <GenericTile header="Goals" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
-            <GenericTile header="Today's Tasks" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
+            <GenericTile header="{i18n>goalsTile}" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
+            <GenericTile header="{i18n>todaysTasksTile}" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
         </content>        
     </Page>
         

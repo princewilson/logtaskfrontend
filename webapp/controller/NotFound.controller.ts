@@ -21,7 +21,7 @@ export default class NotFoundController extends BaseController {
     _onBypassed(): void {
         const oController = this;
         oController.appendHeader();
-        oController.setHeaderTitle("Not found Page");
+        oController.setHeaderTitle("notFoundPageTitle"); // Assuming "notFoundPageTitle" is defined in i18n
         oController._renderClerkComponent();
     }
 
