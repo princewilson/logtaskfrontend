@@ -12,7 +12,7 @@ export default class LoginController extends BaseController {
     _onRouteMatched(): void {
         const oController = this;
         oController.appendHeader();
-        oController.setHeaderTitle("Login Page");
+        oController.setHeaderTitle("loginPageTitle"); // Assuming "loginPageTitle" is defined in i18n
         oController._renderClerkComponent();
     }
 
