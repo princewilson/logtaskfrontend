@@ -13,7 +13,14 @@ export default class LoginController extends BaseController {
         const oController = this;
         oController.appendHeader();
         oController.setHeaderTitle("loginPageTitle"); // Assuming "loginPageTitle" is defined in i18n
-        oController._renderClerkComponent();
+        window.ClerkReady.then(() => {
+            oController._renderClerkComponent();
+            if (window.Clerk && window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
+                // If already signed in, redirect to home page
+                const router = oController.getRouter();
+                router.navTo("home");
+            }
+        });
     }
 
     onBeforeRendering(): void | undefined {
@@ -22,12 +29,14 @@ export default class LoginController extends BaseController {
     onAfterRendering(): void | undefined {
         console.log("Rendering Login Page");
         const oController = this;
-        oController._renderClerkComponent();
-        if (window.Clerk && window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
-            // If already signed in, redirect to home page
-            const router = oController.getRouter();
-            router.navTo("home");
-        }
+        window.ClerkReady.then(() => {
+            oController._renderClerkComponent();
+            if (window.Clerk && window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
+                // If already signed in, redirect to home page
+                const router = oController.getRouter();
+                router.navTo("home");
+            }
+        });
     }
 
     onExit(): void | undefined {

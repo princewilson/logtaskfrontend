@@ -5,5 +5,6 @@ export { };
 declare global {
   interface Window {
     Clerk: ClerkObject;
+    ClerkReady: Promise<void>;
   }
 }

@@ -51,6 +51,11 @@ export default class BaseController extends Controller {
             console.error("ClerkJS is not loaded");
             return;
         }
+
+        if (!window.ClerkReady) {
+            console.error("ClerkJS promise not loaded");
+            return;
+        }
         const router = UIComponent.getRouterFor(this);
 
         if (window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
@@ -90,8 +95,6 @@ export default class BaseController extends Controller {
                         fallbackRedirectUrl: CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
                     });
                 }, 1000);
-            } else {
-                router.navTo("login");
             }
         }
     }

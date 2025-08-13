@@ -20,7 +20,9 @@ export default class HomeController extends BaseController {
         const oController = this;
         oController.appendHeader();
         oController.setHeaderTitle("homePageTitle"); // Assuming "homePageTitle" is defined in i18n
-        oController._renderClerkComponent();
+        window.ClerkReady.then(() => {
+            oController._renderClerkComponent();
+        });
     }
 
     onBeforeRendering(): void | undefined {

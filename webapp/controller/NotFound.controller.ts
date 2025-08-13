@@ -31,7 +31,9 @@ export default class NotFoundController extends BaseController {
     onAfterRendering(): void | undefined {
         console.log("Rendering Not Found Page");
         const oController = this;
-        oController._renderClerkComponent();
+        window.ClerkReady.then(() => {
+            oController._renderClerkComponent();
+        });
     }
     onExit(): void | undefined {
         console.log("NotFoundController exited");
