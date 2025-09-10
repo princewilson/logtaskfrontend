@@ -29,7 +29,10 @@
             "minUI5Version": "1.120",
             "libs": {
                 "sap.ui.core": {},
-                "sap.m": {}
+                "sap.m": {},
+                "sap.f": {},
+                "sap.ui.layout": {},
+                "sap.uxap": {}
             }
         },
         "routing": {
@@ -55,6 +58,11 @@
                     "pattern": "home",
                     "name": "home",
                     "target": "home"
+                },
+                {
+                    "pattern": "goals",
+                    "name": "goals",
+                    "target": "goals"
                 }
             ],
             "targets": {
@@ -66,6 +74,11 @@
                     "id": "home",
                     "name": "Home",
                     "level": 1
+                },
+                "goals": {
+                    "id": "goals",
+                    "name": "Goals",
+                    "level": 2
                 },
                 "notFound": {
                     "id": "notFound",

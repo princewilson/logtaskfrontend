@@ -6,7 +6,7 @@
 
     <Page>
         <content>
-            <GenericTile header="{i18n>goalsTile}" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
+            <GenericTile header="{i18n>goalsTile}" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" press=".onGoalsTilePress"/>
             <GenericTile header="{i18n>todaysTasksTile}" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout"/>
         </content>        
     </Page>

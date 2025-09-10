@@ -1,0 +1,15 @@
+<mvc:View
+	displayBlock="true"
+	height="100%"
+	xmlns="sap.m"
+    xmlns:f="sap.f"
+	xmlns:mvc="sap.ui.core.mvc">
+		<f:FlexibleColumnLayout id="goalsFlexibleColumnLayout" backgroundDesign="Solid">
+            <f:beginColumnPages>
+			    <mvc:XMLView id="beginGoalsView" viewName="LogTask.view.GoalsList"/>
+		    </f:beginColumnPages>
+			<f:midColumnPages>
+				<mvc:XMLView id="goalDetailView" viewName="LogTask.view.GoalDetail"/>
+			</f:midColumnPages>
+        </f:FlexibleColumnLayout>
+</mvc:View>

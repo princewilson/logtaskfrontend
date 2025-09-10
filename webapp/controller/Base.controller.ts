@@ -122,7 +122,7 @@ export default class BaseController extends Controller {
                         contentLeft: [
                             new Button({
                                 type: "Back",
-                                press: oController.onNavBack
+                                press: oController.onNavBack.bind(oController)
                             }),
                             new Title({
                                 text: "{i18n>headerTitle}",

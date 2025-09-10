@@ -1,0 +1,25 @@
+<mvc:View controllerName="LogTask.controller.GoalDetail"
+	xmlns="sap.uxap"
+	xmlns:m="sap.m"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:mvc="sap.ui.core.mvc">
+	<ObjectPageLayout id="ObjectPageLayout" showTitleInHeaderContent="true" alwaysShowContentHeader="false" preserveHeaderStateOnScroll="false" headerContentPinnable="true" isChildPage="true" upperCaseAnchorBar="false">
+		<headerTitle>
+			<ObjectPageDynamicHeaderTitle>
+				<actions>
+					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent"/>
+					<m:Button icon="sap-icon://decline" tooltip="{i18n>closeButtonTooltip}" type="Emphasized" press=".onCloseDetail"/>
+				</actions>
+			</ObjectPageDynamicHeaderTitle>
+		</headerTitle>
+
+		<headerContent>
+			<m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
+				<m:VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+					<m:Label text="{goals>description}"/>
+				</m:VBox>
+			</m:FlexBox>
+		</headerContent>
+	</ObjectPageLayout>
+</mvc:View>
