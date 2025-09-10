@@ -1,3 +1,4 @@
+import Event from 'sap/ui/base/Event';
 import BaseController from './Base.controller'
 
 export default class HomeController extends BaseController {
@@ -36,5 +37,13 @@ export default class HomeController extends BaseController {
 
     onExit(): void | undefined {
         console.log("HomeController exited");
+    }
+
+    onGoalsTilePress(oEvent: Event): void {
+        const oController = this;
+        const oRouter = oController.getRouter();
+
+        // Navigate to the Goals view
+        oRouter.navTo("goals");
     }
 }
