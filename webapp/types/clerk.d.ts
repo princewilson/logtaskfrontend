@@ -14,6 +14,7 @@ interface UserButtonProps {
 
 interface SessionProps {
     status?: SessionStatus;
+    getToken(): Promise<string | null>;
 }
 
 export interface ClerkObject {

@@ -8,7 +8,7 @@
 		<headerTitle>
 			<ObjectPageDynamicHeaderTitle>
 				<actions>
-					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent"/>
+					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent" press=".onDeleteGoal"/>
 					<m:Button icon="sap-icon://decline" tooltip="{i18n>closeButtonTooltip}" type="Emphasized" press=".onCloseDetail"/>
 				</actions>
 			</ObjectPageDynamicHeaderTitle>
