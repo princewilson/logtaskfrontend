@@ -38,8 +38,8 @@ export default class GoalDetailController extends BaseController {
                 "X-Forwarded-Protocol": "http"
             }
         }).then(async (response: Response) => {
-            const text = await response.text();
-            console.log(text); // This will log 'Hello, World!' from your backend
+            const text = await response.json();
+            console.log(text); // This will print the json response from the server
         })
     }
 }
