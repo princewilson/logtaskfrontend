@@ -9,8 +9,17 @@ import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import Table from 'sap/m/Table';
 import ListBinding from 'sap/ui/model/ListBinding';
+import JSONModel from 'sap/ui/model/json/JSONModel';
+import Dialog from 'sap/m/Dialog';
+import Input from 'sap/m/Input';
+import TextArea from 'sap/m/TextArea';
+import MessageToast from 'sap/m/MessageToast';
+import Fragment from 'sap/ui/core/Fragment';
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
 
 export default class GoalsListController extends BaseController {
+    private _oCreateDialog?: Dialog;
+
     onInit(): void | undefined {
         console.log("GoalsListController initialized");
         const oController = this;
@@ -26,11 +35,20 @@ export default class GoalsListController extends BaseController {
         const oRouter = oController.getRouter();
         oRouter.getRoute("goals")?.attachPatternMatched(this._onRouteMatched, this);
     }
-    _onRouteMatched(): void {
+    async _onRouteMatched(): Promise<void> {
         const oController = this;
         oController.appendHeader();
         oController.setHeaderTitle("goalsListTitle"); // Assuming "goalsListTitle" is defined in i18n
         oController._renderClerkComponent();
+
+        let aGoals = await oController.request("/goals", "GET");
+        if (aGoals?.success) {
+            const oGoalsModel = new JSONModel();
+            oGoalsModel.setData({
+                Goals: aGoals.success
+            });
+            oController.getOwnerComponent()?.setModel(oGoalsModel, "goals");
+        }
     }
 
     onBeforeRendering(): void | undefined {
@@ -45,6 +63,11 @@ export default class GoalsListController extends BaseController {
 
     onExit(): void | undefined {
         console.log("GoalsListController exited");
+        // clean up fragment dialog if it exists
+        if (this._oCreateDialog) {
+            this._oCreateDialog.destroy();
+            this._oCreateDialog = undefined;
+        }
     }
 
     onSearch(oEvent: Event): void {
@@ -70,8 +93,74 @@ export default class GoalsListController extends BaseController {
         }
     }
 
-    onAddNewGoal(): void | undefined {
+    async onAddNewGoal(): Promise<void> {
+        const oController = this;
 
+        // Lazy load fragment dialog if not already loaded
+        if (!oController._oCreateDialog) {
+            const viewId = oController.getView()?.getId() as string;
+            const oFragment = await Fragment.load({
+                id: viewId,
+                name: "LogTask.view.fragment.CreateGoal",
+                controller: oController
+            });
+
+            oController._oCreateDialog = oFragment as unknown as Dialog;
+            oController.getView()?.addDependent(oController._oCreateDialog);
+        }
+
+        oController._oCreateDialog.open();
+    }
+
+    async onCreateGoalDialogCreate(): Promise<void> {
+        const oController = this;
+        if (!oController._oCreateDialog) return;
+
+        const viewId = oController.getView()?.getId() as string;
+        const oTitleInput = Fragment.byId(viewId, "createGoalTitleInput") as Input;
+        const oDescriptionInput = Fragment.byId(viewId, "createGoalDescriptionInput") as TextArea;
+
+        const title = (oTitleInput?.getValue() || "").trim();
+        const description = (oDescriptionInput?.getValue() || "").trim();
+
+        const i18nModel = this.getView()?.getModel("i18n") as ResourceModel | undefined;
+        const resourceBundle = await i18nModel?.getResourceBundle();
+        const titleRequiredText = resourceBundle?.getText("titleRequired") || "Please provide a title for the goal.";
+
+        if (!title) {
+            MessageToast.show(titleRequiredText);
+            return;
+        }
+
+        try {
+            await oController.request("/goals", "POST", { title, description });
+            MessageToast.show(resourceBundle?.getText("goalCreated") || "Goal created");
+
+            // Close dialog and clear inputs
+            oController._oCreateDialog.close();
+            if (oTitleInput) oTitleInput.setValue("");
+            if (oDescriptionInput) oDescriptionInput.setValue("");
+
+            // Refresh list
+            await oController._onRouteMatched();
+        } catch (err) {
+            console.error("Failed to create goal:", err);
+            MessageToast.show(resourceBundle?.getText("goalCreateFailed") || "Failed to create goal. Check console for details.");
+        }
+    }
+
+    onCreateGoalDialogClose(): void {
+        const oController = this;
+        if (!oController._oCreateDialog) return;
+
+        const viewId = oController.getView()?.getId() as string;
+        const oTitleInput = Fragment.byId(viewId, "createGoalTitleInput") as Input;
+        const oDescriptionInput = Fragment.byId(viewId, "createGoalDescriptionInput") as TextArea;
+
+        if (oTitleInput) oTitleInput.setValue("");
+        if (oDescriptionInput) oDescriptionInput.setValue("");
+
+        oController._oCreateDialog.close();
     }
 
     onGoalsListItemPress(oEvent: Event): void | undefined {
