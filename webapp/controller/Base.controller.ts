@@ -1,7 +1,6 @@
 import Controller from "sap/ui/core/mvc/Controller";
 import UIComponent from "sap/ui/core/UIComponent";
-import { CLERK_SIGN_IN_FALLBACK_REDIRECT_URL } from '../constants';
-import { CLERK_AFTER_SIGNOUT_URL } from '../constants';
+import { CLERK_SIGN_IN_FALLBACK_REDIRECT_URL, CLERK_AFTER_SIGNOUT_URL, API_BASE_URL } from '../constants';
 import JSONModel from "sap/ui/model/json/JSONModel";
 import ManagedObject from "sap/ui/base/ManagedObject";
 import Page from "sap/m/Page";
@@ -151,6 +150,94 @@ export default class BaseController extends Controller {
     getRouter() {
         return UIComponent.getRouterFor(this);
     }
+
+    /**
+     * Generic network request helper that:
+     * - Ensures a Clerk token is present for authentication
+     * - Builds sane default headers (Accept, Sec-Fetch-Dest, X-Forwarded-Host, X-Forwarded-Protocol)
+     * - Automatically sets Content-Type for JSON bodies
+     * - Parses JSON/text responses and throws on non-2xx
+     */
+    protected async request<T = any>(endpoint: string, method: string = "GET", body?: any, extraHeaders?: Record<string, string>): Promise<T> {
+        let url: URL;
+        if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+            url = new URL(endpoint);
+        } else if (endpoint.startsWith("/")) {
+            // path relative to API base
+            url = new URL(endpoint, API_BASE_URL);
+        } else {
+            // treat as relative path
+            url = new URL(`/${endpoint}`, API_BASE_URL);
+        }
+
+        // Fetch Clerk token and require it for all calls
+        let token = "";
+        try {
+            token = (await window.Clerk?.session?.getToken?.()) || "";
+        } catch (err) {
+            console.error("Failed to obtain Clerk token:", err);
+            throw new Error("Authentication token could not be retrieved");
+        }
+
+        if (!token) {
+            throw new Error("Missing Clerk authentication token");
+        }
+
+        const headers: Record<string, string> = {
+            "Accept": "application/json",
+            "Sec-Fetch-Dest": "document",
+            "X-Forwarded-Host": url.host,
+            "X-Forwarded-Protocol": url.protocol.replace(":", ""),
+            "Authorization": `Bearer ${token}`,
+            ...extraHeaders
+        };
+
+        const init: RequestInit = { method, headers };
+
+        if (body !== undefined) {
+            if (body instanceof FormData) {
+                init.body = body;
+                // Let browser set multipart boundaries and Content-Type for FormData
+            } else if (typeof body === "string") {
+                init.body = body;
+                headers["Content-Type"] = headers["Content-Type"] || "text/plain;charset=utf-8";
+            } else {
+                init.body = JSON.stringify(body);
+                headers["Content-Type"] = headers["Content-Type"] || "application/json";
+            }
+        }
+
+        const response = await fetch(url.toString(), init);
+
+        // Parse response intelligently
+        let parsed: any;
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+            parsed = await response.json();
+        } else {
+            parsed = await response.text();
+        }
+
+        if (!response.ok) {
+            const err: any = new Error(`Request failed: ${response.status} ${response.statusText}`);
+            err.status = response.status;
+            err.body = parsed;
+            throw err;
+        }
+
+        return parsed as T;
+    }
+
+    protected diff<T extends object>(current: T, original: T): Partial<T> {
+        const changes: Partial<T> = {};
+        (Object.keys(current) as (keyof T)[]).forEach(key => {
+            if (current[key] !== original[key]) {
+                changes[key] = current[key];
+            }
+        });
+        return changes;
+    }
+
     onNavBack(): void {
         let oController = this;
         let oHistory, sPreviousHash;

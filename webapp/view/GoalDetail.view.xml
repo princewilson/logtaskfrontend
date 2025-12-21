@@ -8,8 +8,11 @@
 		<headerTitle>
 			<ObjectPageDynamicHeaderTitle>
 				<actions>
-					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent" press=".onDeleteGoal"/>
-					<m:Button icon="sap-icon://decline" tooltip="{i18n>closeButtonTooltip}" type="Emphasized" press=".onCloseDetail"/>
+					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent" press=".onDeleteGoal" visible="{ui>/edit}"/>
+					<m:Button icon="sap-icon://edit" tooltip="{i18n>editGoalButtonTooltip}" type="Transparent" press=".onEditGoal" visible="{= !%{ui>/edit} }"/>
+					<m:Button icon="sap-icon://cancel" tooltip="{i18n>saveGoalButtonTooltip}" type="Transparent" press=".onCancelGoal" visible="{ui>/edit}"/>
+					<m:Button icon="sap-icon://save" tooltip="{i18n>saveGoalButtonTooltip}" type="Transparent" press=".onSaveGoal" visible="{ui>/edit}"/>
+					<m:Button icon="sap-icon://decline" tooltip="{i18n>closeButtonTooltip}" type="Transparent" press=".onCloseDetail"/>
 				</actions>
 			</ObjectPageDynamicHeaderTitle>
 		</headerTitle>
@@ -17,7 +20,12 @@
 		<headerContent>
 			<m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
 				<m:VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-					<m:Label text="{goals>description}"/>
+					<form:SimpleForm layout="ResponsiveGridLayout" editable="true" class="centeredDialogContent" labelSpanXL="2" labelSpanL="2" labelSpanM="2" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
+						<form:content>
+							<m:Label text="{i18n>goalDescriptionLabel}"/>
+							<m:Input value="{goalsCurrent>description}" editable="{= %{ui>/edit} }"/>
+						</form:content>
+					</form:SimpleForm>
 				</m:VBox>
 			</m:FlexBox>
 		</headerContent>

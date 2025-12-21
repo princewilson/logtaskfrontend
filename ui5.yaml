@@ -11,6 +11,7 @@ framework:
     - name: themelib_sap_horizon
     - name: sap.f
     - name: sap.uxap
+    - name: sap.ui.layout
 builder:
   customTasks:
     - name: ui5-tooling-transpile-task
