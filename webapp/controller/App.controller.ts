@@ -1,4 +1,18 @@
+import JSONModel from 'sap/ui/model/json/JSONModel';
 import BaseController from './Base.controller'
 
 export default class AppController extends BaseController {
+    onInit(): void | undefined {
+        console.log("AppController initialized");
+
+        const oController = this;
+        let oUIModel = oController?.getOwnerComponent()?.getModel("ui") as JSONModel || undefined;
+
+        if (!oUIModel) {
+            oUIModel = new JSONModel({
+                edit: false
+            });
+            oController.getOwnerComponent()?.setModel(oUIModel, "ui");
+        }
+    }
 }

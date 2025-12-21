@@ -1,7 +1,15 @@
 import JSONModel from 'sap/ui/model/json/JSONModel';
 import BaseController from './Base.controller'
 import FlexibleColumnLayout from 'sap/f/FlexibleColumnLayout';
+import ResourceModel from 'sap/ui/model/resource/ResourceModel';
+import MessageToast from 'sap/m/MessageToast';
+import Dialog from 'sap/m/Dialog';
+import Fragment from 'sap/ui/core/Fragment';
+import { Goal } from '../types/Goal';
+
 export default class GoalDetailController extends BaseController {
+    private _oDeleteGoalDialog?: Dialog;
+
     onInit(): void | undefined {
         console.log("GoalDetailController initialized");
     }
@@ -13,6 +21,66 @@ export default class GoalDetailController extends BaseController {
     }
     onExit(): void | undefined {
         console.log("GoalDetailController exited");
+    }
+    onEditGoal(): void {
+        const oController = this;
+        const oView = oController.getView();
+        const oGoalsCurrentModel = oView?.getModel("goalsCurrent") as JSONModel;
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+        const bEditMode = oUIModel?.getProperty("/edit");
+
+        // On entering edit mode, ensure goalsCurrent is a fresh copy of goalsOriginal
+        if (!bEditMode) {
+            const oGoalsOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
+            oGoalsCurrentModel.setProperty("/Goals", structuredClone(oGoalsOriginal.getProperty("/Goals")));
+        }
+        oUIModel?.setProperty("/edit", !bEditMode);
+    }
+    async onSaveGoal(): Promise<void> {
+        const oController = this;
+        const oView = oController.getView();
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+        const oGoalsCurrentModel = oView?.getModel("goalsCurrent") as JSONModel;
+        const sBindingPath = oView?.getBindingContext("goalsCurrent")?.getPath();
+        const oCurrent: Goal = oView?.getModel("goalsCurrent")?.getProperty(sBindingPath!) as Goal;
+        const aOriginalGoals: Goal[] = oController.getOwnerComponent()?.getModel("goalsOriginal")?.getProperty("/Goals") as Goal[] || [];
+        const oOriginal: Goal = aOriginalGoals.find(goal => goal.id === oCurrent.id)!;
+        const bEditMode = oUIModel?.getProperty("/edit");
+        let oChangedFields: Partial<Goal> = {};
+
+        oChangedFields = oController.diff<Goal>(oCurrent, oOriginal);
+
+        if (Object.keys(oChangedFields).length > 0 && sBindingPath) {
+            const sGoalId = oCurrent.id;
+            let oUpdateGoal = await oController.request(`/goals/${sGoalId}`, "PUT", oChangedFields);
+            if (oUpdateGoal?.success) {
+                // Update local model
+                const oGoal = oGoalsCurrentModel.getProperty(sBindingPath);
+                Object.assign(oGoal, oChangedFields);
+                oGoalsCurrentModel.setProperty(sBindingPath, oGoal);
+
+                const aGoals = oGoalsCurrentModel.getProperty("/Goals") as Goal[];
+                // Update both models to new state
+                (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+                (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+            }
+        }
+        // Exit edit mode
+        oUIModel?.setProperty("/edit", !bEditMode);
+    }
+    onCancelGoal(): void {
+        const oController = this;
+        const oView = oController.getView();
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+        const bEditMode = oUIModel?.getProperty("/edit");
+
+        // Reset goalsCurrent to original
+        const oOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
+        if (oOriginal) {
+            (oView?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
+        }
+        // Exit edit mode
+        oUIModel?.setProperty("/edit", !bEditMode);
     }
     onCloseDetail(): void {
         const oController = this;
@@ -26,5 +94,54 @@ export default class GoalDetailController extends BaseController {
     }
     async onDeleteGoal(): Promise<void> {
         const oController = this;
+
+        if (!oController._oDeleteGoalDialog) {
+            const viewId = oController.getView()?.getId() as string;
+            const oFragment = await Fragment.load({
+                id: viewId,
+                name: "LogTask.view.fragment.DeleteGoal",
+                controller: oController
+            });
+
+            oController._oDeleteGoalDialog = oFragment as Dialog;
+            oController.getView()?.addDependent(oController._oDeleteGoalDialog);
+        }
+
+        oController._oDeleteGoalDialog.open();
+    }
+
+    async onConfirmDeleteGoalYes(): Promise<void> {
+        const oController = this;
+        const oView = oController.getView();
+        const oGoalsCurrentModel = oView?.getModel("goalsCurrent") as JSONModel;
+        const sBindingPath = oView?.getBindingContext("goalsCurrent")?.getPath();
+        const oCurrentGoal: Goal = oView?.getModel("goalsCurrent")?.getProperty(sBindingPath!) as Goal;
+        const sGoalId = oCurrentGoal.id;
+        const i18nModel = oController.getView()?.getModel("i18n") as ResourceModel;
+        const resourceBundle = await i18nModel?.getResourceBundle();
+
+        if (sGoalId) {
+            let oDeleteGoal = await oController.request(`/goals/${sGoalId}`, "DELETE");
+            if (oDeleteGoal?.success) {
+                MessageToast.show(resourceBundle?.getText("goalDeletedMessage") || "Goal deleted successfully");
+
+                let aGoals = oGoalsCurrentModel?.getProperty("/Goals") as any[] || [];
+                aGoals = aGoals.filter((goal: any) => goal.id !== sGoalId);
+
+                (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+                (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+            }
+            oController.onCloseDetail();
+        }
+        if (oController._oDeleteGoalDialog) {
+            oController._oDeleteGoalDialog.close();
+        }
+    }
+
+    onConfirmDeleteGoalNo(): void {
+        const oController = this;
+        if (oController._oDeleteGoalDialog) {
+            oController._oDeleteGoalDialog.close();
+        }
     }
 }

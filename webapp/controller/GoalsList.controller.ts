@@ -43,11 +43,20 @@ export default class GoalsListController extends BaseController {
 
         let aGoals = await oController.request("/goals", "GET");
         if (aGoals?.success) {
-            const oGoalsModel = new JSONModel();
-            oGoalsModel.setData({
-                Goals: aGoals.success
-            });
-            oController.getOwnerComponent()?.setModel(oGoalsModel, "goals");
+            let oGoalsOriginalModel = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel | undefined;
+            let oGoalsCurrentModel = oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel | undefined;
+
+            if (!oGoalsOriginalModel) {
+                oGoalsOriginalModel = new JSONModel({});
+                oController.getOwnerComponent()?.setModel(oGoalsOriginalModel, "goalsOriginal");
+            }
+            if (!oGoalsCurrentModel) {
+                oGoalsCurrentModel = new JSONModel({});
+                oController.getOwnerComponent()?.setModel(oGoalsCurrentModel, "goalsCurrent");
+            }
+
+            oGoalsOriginalModel.setProperty("/Goals", structuredClone(aGoals.success));
+            oGoalsCurrentModel.setProperty("/Goals", structuredClone(aGoals.success));
         }
     }
 
@@ -80,7 +89,6 @@ export default class GoalsListController extends BaseController {
             aFilters = [
                 new Filter({
                     filters: [
-                        new Filter("id", FilterOperator.Contains, sQuery),
                         new Filter("title", FilterOperator.Contains, sQuery)
                     ],
                     and: false
@@ -105,7 +113,7 @@ export default class GoalsListController extends BaseController {
                 controller: oController
             });
 
-            oController._oCreateDialog = oFragment as unknown as Dialog;
+            oController._oCreateDialog = oFragment as Dialog;
             oController.getView()?.addDependent(oController._oCreateDialog);
         }
 
@@ -126,23 +134,43 @@ export default class GoalsListController extends BaseController {
         const i18nModel = this.getView()?.getModel("i18n") as ResourceModel | undefined;
         const resourceBundle = await i18nModel?.getResourceBundle();
         const titleRequiredText = resourceBundle?.getText("titleRequired") || "Please provide a title for the goal.";
+        const descriptionRequiredText = resourceBundle?.getText("descriptionRequired") || "Please provide a description for the goal.";
 
         if (!title) {
             MessageToast.show(titleRequiredText);
             return;
         }
+        if (!description) {
+            MessageToast.show(descriptionRequiredText);
+            return;
+        }
 
         try {
-            await oController.request("/goals", "POST", { title, description });
-            MessageToast.show(resourceBundle?.getText("goalCreated") || "Goal created");
+            let response = await oController.request("/goals", "POST", {
+                title,
+                description
+            });
+
+            if (response?.success) {
+                MessageToast.show(resourceBundle?.getText("goalCreated") || "Goal created");
+
+                // Refresh list
+                const oModel = oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel;
+                const aGoals = oModel.getProperty("/Goals") as Array<Object> || [];
+
+                aGoals.unshift({
+                    ...response.success
+                });
+
+                oModel.setProperty("/Goals", aGoals);
+            }
 
             // Close dialog and clear inputs
             oController._oCreateDialog.close();
             if (oTitleInput) oTitleInput.setValue("");
             if (oDescriptionInput) oDescriptionInput.setValue("");
 
-            // Refresh list
-            await oController._onRouteMatched();
+
         } catch (err) {
             console.error("Failed to create goal:", err);
             MessageToast.show(resourceBundle?.getText("goalCreateFailed") || "Failed to create goal. Check console for details.");
@@ -170,7 +198,7 @@ export default class GoalsListController extends BaseController {
             return;
         }
 
-        const sPath = oItem.getBindingContext("goals")?.getPath()
+        const sPath = oItem.getBindingContext("goalsCurrent")?.getPath()
         if (!sPath) {
             console.error("Binding context path not found");
             return;
@@ -190,7 +218,7 @@ export default class GoalsListController extends BaseController {
             }
 
             oGoalDetailView.bindElement({
-                path: sPath, model: "goals"
+                path: sPath, model: "goalsCurrent"
             });
         } else {
             console.error("No mid column pages found");

@@ -228,6 +228,16 @@ export default class BaseController extends Controller {
         return parsed as T;
     }
 
+    protected diff<T extends object>(current: T, original: T): Partial<T> {
+        const changes: Partial<T> = {};
+        (Object.keys(current) as (keyof T)[]).forEach(key => {
+            if (current[key] !== original[key]) {
+                changes[key] = current[key];
+            }
+        });
+        return changes;
+    }
+
     onNavBack(): void {
         let oController = this;
         let oHistory, sPreviousHash;

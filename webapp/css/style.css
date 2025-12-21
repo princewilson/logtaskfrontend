@@ -5,3 +5,16 @@ div#clerk-user {
 .tileLayout {
     float: left;
 }
+
+/* Centered Dialog Title */
+.centeredDialogTitle .sapMDialogTitle {
+    text-align: center;
+    width: 100%;
+}
+
+/* Centered Dialog Content */
+.centeredDialogContent {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}

@@ -12,10 +12,10 @@
 						<OverflowToolbar class="sapFDynamicPageAlignContent">
 							<ToolbarSpacer/>
 							<SearchField search=".onSearch" width="17.5rem"/>
-							<OverflowToolbarButton icon="sap-icon://add" text="Add" type="Transparent" press=".onAddNewGoal"/>
+							<OverflowToolbarButton icon="sap-icon://add" text="Add" type="Transparent" press=".onAddNewGoal" visible="{mode>/create}"/>
 						</OverflowToolbar>
 						<Table id="goalsTable" inset="false" items="{
-						path: 'goals>/Goals',
+						path: 'goalsCurrent>/Goals',
 						sorter: {
 							path: 'title'
 						}
@@ -28,7 +28,7 @@
 							<items>
 								<ColumnListItem type="Navigation" press=".onGoalsListItemPress">
 									<cells>
-										<ObjectIdentifier title="{goals>title}" text="{goals>id}"/>
+										<ObjectIdentifier title="{goalsCurrent>title}" text="{goalsCurrent>id}"/>
 									</cells>
 								</ColumnListItem>
 							</items>

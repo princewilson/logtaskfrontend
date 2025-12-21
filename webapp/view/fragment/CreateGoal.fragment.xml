@@ -1,10 +1,16 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-  <Dialog id="createGoalDialog" title="{i18n>createGoalTitle}">
+<core:FragmentDefinition xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:f="sap.ui.layout.form">
+  <Dialog id="createGoalDialog" title="{i18n>createGoalTitle}" class="centeredDialogTitle">
     <content>
-      <Label text="{i18n>titleLabel}" />
-      <Input id="createGoalTitleInput" placeholder="{i18n>titlePlaceholder}" />
-      <Label text="{i18n>descriptionLabel}" />
-      <TextArea id="createGoalDescriptionInput" placeholder="{i18n>descriptionPlaceholder}" rows="5" />
+      <f:SimpleForm layout="ResponsiveGridLayout" editable="true" class="centeredDialogContent" labelSpanXL="2" labelSpanL="2" labelSpanM="2" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
+        <f:content>
+          <Label text="{i18n>titleLabel}" labelFor="createGoalTitleInput"/>
+          <Input id="createGoalTitleInput" placeholder="{i18n>titlePlaceholder}" width="20rem"/>
+          <Label text="{i18n>descriptionLabel}" labelFor="createGoalDescriptionInput"/>
+          <TextArea id="createGoalDescriptionInput" placeholder="{i18n>descriptionPlaceholder}" rows="5" width="20rem"/>
+        </f:content>
+      </f:SimpleForm>
     </content>
     <beginButton>
       <Button text="{i18n>createButton}" press=".onCreateGoalDialogCreate" />
