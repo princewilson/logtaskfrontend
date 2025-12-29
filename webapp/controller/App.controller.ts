@@ -10,7 +10,8 @@ export default class AppController extends BaseController {
 
         if (!oUIModel) {
             oUIModel = new JSONModel({
-                edit: false
+                edit: false,
+                busy: false,
             });
             oController.getOwnerComponent()?.setModel(oUIModel, "ui");
         }
