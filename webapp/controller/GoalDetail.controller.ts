@@ -35,6 +35,10 @@ export default class GoalDetailController extends BaseController {
             oGoalsCurrentModel.setProperty("/Goals", structuredClone(oGoalsOriginal.getProperty("/Goals")));
         }
         oUIModel?.setProperty("/edit", !bEditMode);
+        oUIModel?.setProperty("/dirty", false);
+
+        // Attach property change listener to track changes
+        oGoalsCurrentModel.attachPropertyChange(oController._onGoalPropertyChange, oController);
     }
     async onSaveGoal(): Promise<void> {
         const oController = this;
@@ -63,10 +67,15 @@ export default class GoalDetailController extends BaseController {
                 // Update both models to new state
                 (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
                 (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+
+                oGoalsCurrentModel.detachPropertyChange(oController._onGoalPropertyChange, oController);
             }
+        } else {
+            MessageToast.show("No changes to save.");
         }
         // Exit edit mode
         oUIModel?.setProperty("/edit", !bEditMode);
+        oUIModel?.setProperty("/dirty", false);
     }
     onCancelGoal(): void {
         const oController = this;
@@ -76,10 +85,14 @@ export default class GoalDetailController extends BaseController {
 
         // Reset goalsCurrent to original
         const oOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
+        const oCurrent = oView?.getModel("goalsCurrent") as JSONModel;
         if (oOriginal) {
-            (oView?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
+            oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
         }
         // Exit edit mode
+
+        oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
+        oUIModel?.setProperty("/dirty", false);
         oUIModel?.setProperty("/edit", !bEditMode);
     }
     onCloseDetail(): void {
@@ -127,13 +140,16 @@ export default class GoalDetailController extends BaseController {
             if (oDeleteGoal?.success) {
                 MessageToast.show(resourceBundle?.getText("goalDeletedMessage") || "Goal deleted successfully");
 
-                let aGoals = oGoalsCurrentModel?.getProperty("/Goals") as any[] || [];
-                aGoals = aGoals.filter((goal: any) => goal.id !== sGoalId);
+                oGoalsCurrentModel.detachPropertyChange(oController._onGoalPropertyChange, oController);
+
+                let aGoals = oGoalsCurrentModel?.getProperty("/Goals") as Goal[] || [];
+                aGoals = aGoals.filter((goal: Goal) => goal.id !== sGoalId);
 
                 (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
                 (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
 
                 oUIModel?.setProperty("/edit", !bEditMode);
+                oUIModel?.setProperty("/dirty", false);
                 oController.onCloseDetail();
             }
         }
@@ -147,5 +163,25 @@ export default class GoalDetailController extends BaseController {
         if (oController._oDeleteGoalDialog) {
             oController._oDeleteGoalDialog.close();
         }
+    }
+
+    private _onGoalPropertyChange(): void {
+        const oController = this;
+        const oView = oController.getView();
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+
+        const sPath = oView?.getBindingContext("goalsCurrent")?.getPath();
+        if (!sPath) return;
+
+        const oCurrent = oView?.getModel("goalsCurrent")?.getProperty(sPath) as Goal;
+        const aOriginalGoals = oController.getOwnerComponent()
+            ?.getModel("goalsOriginal")
+            ?.getProperty("/Goals") as Goal[];
+
+        const oOriginal = aOriginalGoals.find(g => g.id === oCurrent.id);
+        if (!oOriginal) return;
+
+        const hasChanges = Object.keys(oController.diff(oCurrent, oOriginal)).length > 0;
+        oUIModel.setProperty("/dirty", hasChanges);
     }
 }
