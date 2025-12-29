@@ -1,10 +1,8 @@
-<mvc:View
-	controllerName="LogTask.controller.App"
+<mvc:View controllerName="LogTask.controller.App"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:core="sap.ui.core"
-	displayBlock="true">
+	xmlns:core="sap.ui.core" displayBlock="true" busy="{ui>/busy}">
 	<Shell>
-		<App id="app" />
+		<App id="app" busy="{ui>/busy}" />
 	</Shell>
 </mvc:View>

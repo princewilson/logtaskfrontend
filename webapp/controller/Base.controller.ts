@@ -159,6 +159,7 @@ export default class BaseController extends Controller {
      * - Parses JSON/text responses and throws on non-2xx
      */
     protected async request<T = any>(endpoint: string, method: string = "GET", body?: any, extraHeaders?: Record<string, string>): Promise<T> {
+        const oController = this;
         let url: URL;
         if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
             url = new URL(endpoint);
@@ -207,25 +208,36 @@ export default class BaseController extends Controller {
             }
         }
 
-        const response = await fetch(url.toString(), init);
+        const oUIModel = oController.getOwnerComponent()?.getModel("ui") as JSONModel | undefined;
 
-        // Parse response intelligently
-        let parsed: any;
-        const contentType = response.headers.get("content-type") || "";
-        if (contentType.includes("application/json")) {
-            parsed = await response.json();
-        } else {
-            parsed = await response.text();
-        }
+        try {
+            oUIModel?.setProperty("/busy", true);
 
-        if (!response.ok) {
-            const err: any = new Error(`Request failed: ${response.status} ${response.statusText}`);
-            err.status = response.status;
-            err.body = parsed;
+            const response = await fetch(url.toString(), init);
+
+            // Parse response intelligently
+            let parsed: any;
+            const contentType = response.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+                parsed = await response.json();
+            } else {
+                parsed = await response.text();
+            }
+
+            if (!response.ok) {
+                const err: any = new Error(`Request failed: ${response.status} ${response.statusText}`);
+                err.status = response.status;
+                err.body = parsed;
+                throw err;
+            }
+
+            return parsed as T;
+        } catch (err) {
+            console.error("Network request failed:", err);
             throw err;
+        } finally {
+            oUIModel?.setProperty("/busy", false);
         }
-
-        return parsed as T;
     }
 
     protected diff<T extends object>(current: T, original: T): Partial<T> {
