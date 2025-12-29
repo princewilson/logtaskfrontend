@@ -11,7 +11,7 @@
 					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent" press=".onDeleteGoal" visible="{ui>/edit}"/>
 					<m:Button icon="sap-icon://edit" tooltip="{i18n>editGoalButtonTooltip}" type="Transparent" press=".onEditGoal" visible="{= !%{ui>/edit} }"/>
 					<m:Button icon="sap-icon://cancel" tooltip="{i18n>saveGoalButtonTooltip}" type="Transparent" press=".onCancelGoal" visible="{ui>/edit}"/>
-					<m:Button icon="sap-icon://save" tooltip="{i18n>saveGoalButtonTooltip}" type="Transparent" press=".onSaveGoal" visible="{ui>/edit}"/>
+					<m:Button icon="sap-icon://save" tooltip="{i18n>saveGoalButtonTooltip}" type="Transparent" press=".onSaveGoal" visible="{ui>/edit}" enabled="{= %{ui>/edit} &amp;&amp; %{ui>/dirty} }"/>
 					<m:Button icon="sap-icon://decline" tooltip="{i18n>closeButtonTooltip}" type="Transparent" press=".onCloseDetail"/>
 				</actions>
 			</ObjectPageDynamicHeaderTitle>
