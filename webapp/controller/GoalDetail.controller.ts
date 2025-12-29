@@ -113,6 +113,8 @@ export default class GoalDetailController extends BaseController {
     async onConfirmDeleteGoalYes(): Promise<void> {
         const oController = this;
         const oView = oController.getView();
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+        const bEditMode = oUIModel?.getProperty("/edit");
         const oGoalsCurrentModel = oView?.getModel("goalsCurrent") as JSONModel;
         const sBindingPath = oView?.getBindingContext("goalsCurrent")?.getPath();
         const oCurrentGoal: Goal = oView?.getModel("goalsCurrent")?.getProperty(sBindingPath!) as Goal;
@@ -131,6 +133,7 @@ export default class GoalDetailController extends BaseController {
                 (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
                 (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
 
+                oUIModel?.setProperty("/edit", !bEditMode);
                 oController.onCloseDetail();
             }
         }
