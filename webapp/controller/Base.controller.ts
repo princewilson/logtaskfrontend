@@ -12,6 +12,8 @@ import Button from "sap/m/Button";
 import History from "sap/ui/core/routing/History";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 /**
  * @name LogTask.controller.Base
  */
@@ -160,6 +162,8 @@ export default class BaseController extends Controller {
      */
     protected async request<T = any>(endpoint: string, method: string = "GET", body?: any, extraHeaders?: Record<string, string>): Promise<T> {
         const oController = this;
+        const oUIModel = oController.getOwnerComponent()?.getModel("ui") as JSONModel | undefined;
+
         let url: URL;
         if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
             url = new URL(endpoint);
@@ -170,47 +174,38 @@ export default class BaseController extends Controller {
             // treat as relative path
             url = new URL(`/${endpoint}`, API_BASE_URL);
         }
-
-        // Fetch Clerk token and require it for all calls
-        let token = "";
         try {
+            // Fetch Clerk token and require it for all calls
+            let token = "";
             token = (await window.Clerk?.session?.getToken?.()) || "";
-        } catch (err) {
-            console.error("Failed to obtain Clerk token:", err);
-            throw new Error("Authentication token could not be retrieved");
-        }
 
-        if (!token) {
-            throw new Error("Missing Clerk authentication token");
-        }
-
-        const headers: Record<string, string> = {
-            "Accept": "application/json",
-            "Sec-Fetch-Dest": "document",
-            "X-Forwarded-Host": url.host,
-            "X-Forwarded-Protocol": url.protocol.replace(":", ""),
-            "Authorization": `Bearer ${token}`,
-            ...extraHeaders
-        };
-
-        const init: RequestInit = { method, headers };
-
-        if (body !== undefined) {
-            if (body instanceof FormData) {
-                init.body = body;
-                // Let browser set multipart boundaries and Content-Type for FormData
-            } else if (typeof body === "string") {
-                init.body = body;
-                headers["Content-Type"] = headers["Content-Type"] || "text/plain;charset=utf-8";
-            } else {
-                init.body = JSON.stringify(body);
-                headers["Content-Type"] = headers["Content-Type"] || "application/json";
+            if (!token) {
+                const err: any = new Error("Not authenticated");
+                err.status = 401;
+                throw err;
             }
-        }
 
-        const oUIModel = oController.getOwnerComponent()?.getModel("ui") as JSONModel | undefined;
+            const headers: Record<string, string> = {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${token}`,
+                ...extraHeaders
+            };
 
-        try {
+            const init: RequestInit = { method, headers };
+
+            if (body !== undefined) {
+                if (body instanceof FormData) {
+                    init.body = body;
+                    // Let browser set multipart boundaries and Content-Type for FormData
+                } else if (typeof body === "string") {
+                    init.body = body;
+                    headers["Content-Type"] = headers["Content-Type"] || "text/plain;charset=utf-8";
+                } else {
+                    init.body = JSON.stringify(body);
+                    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+                }
+            }
+
             oUIModel?.setProperty("/busy", true);
 
             const response = await fetch(url.toString(), init);
@@ -232,8 +227,28 @@ export default class BaseController extends Controller {
             }
 
             return parsed as T;
-        } catch (err) {
-            console.error("Network request failed:", err);
+        } catch (err: unknown) {
+            const isHttpError = (e: unknown): e is Error & { status?: number | string; body?: any } =>
+                e instanceof Error && 'status' in e;
+
+            if (isHttpError(err)) {
+                const status = Number(err.status);
+
+                if ([400, 404, 409].includes(status)) {
+                    MessageBox.error(
+                        err?.body?.error || "Operation failed.",
+                        { title: "Operation Failed" }
+                    );
+                    throw err;
+                } else if (status === 401) {
+                    MessageBox.error("Please re-login and try again", {
+                        title: "Session Expired",
+                    });
+                    throw err;
+                }
+            }
+
+            MessageToast.show("Could not connect to the server.");
             throw err;
         } finally {
             oUIModel?.setProperty("/busy", false);

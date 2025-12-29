@@ -145,12 +145,12 @@ export default class GoalsListController extends BaseController {
             return;
         }
 
-        try {
-            let response = await oController.request("/goals", "POST", {
-                title,
-                description
-            });
 
+        let response = await oController.request("/goals", "POST", {
+            title,
+            description
+        });
+        try {
             if (response?.success) {
                 MessageToast.show(resourceBundle?.getText("goalCreated") || "Goal created");
 
@@ -169,8 +169,6 @@ export default class GoalsListController extends BaseController {
             oController._oCreateDialog.close();
             if (oTitleInput) oTitleInput.setValue("");
             if (oDescriptionInput) oDescriptionInput.setValue("");
-
-
         } catch (err) {
             console.error("Failed to create goal:", err);
             MessageToast.show(resourceBundle?.getText("goalCreateFailed") || "Failed to create goal. Check console for details.");

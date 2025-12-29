@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Dialog id="deleteGoalDialog" type="Message" title="{i18n>confirmDeleteTitle}" class="centeredDialogTitle">
+    <Dialog busy="{ui>/busy}" id="deleteGoalDialog" type="Message" title="{i18n>confirmDeleteTitle}" class="centeredDialogTitle">
         <content>
             <Text text="{i18n>confirmDeleteMessage}" />
         </content>

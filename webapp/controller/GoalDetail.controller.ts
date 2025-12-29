@@ -130,8 +130,9 @@ export default class GoalDetailController extends BaseController {
 
                 (oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
                 (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
+
+                oController.onCloseDetail();
             }
-            oController.onCloseDetail();
         }
         if (oController._oDeleteGoalDialog) {
             oController._oDeleteGoalDialog.close();

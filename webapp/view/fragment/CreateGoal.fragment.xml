@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m"
   xmlns:core="sap.ui.core"
   xmlns:f="sap.ui.layout.form">
-  <Dialog id="createGoalDialog" title="{i18n>createGoalTitle}" class="centeredDialogTitle">
+  <Dialog busy="{ui>/busy}" id="createGoalDialog" title="{i18n>createGoalTitle}" class="centeredDialogTitle">
     <content>
       <f:SimpleForm layout="ResponsiveGridLayout" editable="true" class="centeredDialogContent" labelSpanXL="2" labelSpanL="2" labelSpanM="2" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
         <f:content>
