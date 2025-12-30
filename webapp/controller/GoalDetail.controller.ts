@@ -115,11 +115,44 @@ export default class GoalDetailController extends BaseController {
     onCloseDetail(): void {
         const oController = this;
         const oView = oController.getView();
+        const oUIModel = oView?.getModel("ui") as JSONModel;
+        const bEditMode = oUIModel?.getProperty("/edit");
+        const bDirty = oUIModel?.getProperty("/dirty");
+        const oOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
+        const oCurrent = oView?.getModel("goalsCurrent") as JSONModel;
         const oFCL = oView?.getParent()?.getParent() as FlexibleColumnLayout;
-        // Check if FlexibleColumnLayout exists
-        if (oFCL && typeof oFCL.setLayout === "function") {
-            // Show only the begin column (list)
-            oFCL.setLayout("OneColumn");
+
+        if (bDirty) {
+            MessageBox.warning("Are you sure you want to discard your changes?", {
+                title: "Confirm",
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                onClose: function (sAction: string) {
+                    if (sAction === MessageBox.Action.YES) {
+                        // Reset goalsCurrent to original
+                        if (oOriginal) {
+                            oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
+                        }
+                        // Exit edit mode
+                        oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
+                        oUIModel?.setProperty("/dirty", false);
+                        oUIModel?.setProperty("/edit", !bEditMode);
+
+                        // Check if FlexibleColumnLayout exists
+                        if (oFCL && typeof oFCL.setLayout === "function") {
+                            // Show only the begin column (list)
+                            oFCL.setLayout("OneColumn");
+                        }
+                    }
+                }
+            })
+        } else {
+            // Check if FlexibleColumnLayout exists
+            if (oFCL && typeof oFCL.setLayout === "function") {
+                // Show only the begin column (list)
+                oFCL.setLayout("OneColumn");
+                oUIModel?.setProperty("/dirty", false);
+                oUIModel?.setProperty("/edit", false);
+            }
         }
     }
     async onDeleteGoal(): Promise<void> {
