@@ -7,10 +7,22 @@ import Dialog from 'sap/m/Dialog';
 import Fragment from 'sap/ui/core/Fragment';
 import { Goal } from '../types/Goal';
 import MessageBox from 'sap/m/MessageBox';
+import Event from 'sap/ui/base/Event';
 
 export default class GoalDetailController extends BaseController {
     private _oDeleteGoalDialog?: Dialog;
-
+    private _bPropertyChangeAttached = false;
+    private _confirmDiscardAndReset(onConfirm: () => void): void {
+        MessageBox.warning("Are you sure you want to discard your changes?", {
+            title: "Confirm",
+            actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+            onClose: function (sAction: string) {
+                if (sAction === MessageBox.Action.YES) {
+                    onConfirm();
+                }
+            }
+        })
+    }
     onInit(): void | undefined {
         console.log("GoalDetailController initialized");
     }
@@ -39,7 +51,10 @@ export default class GoalDetailController extends BaseController {
         oUIModel?.setProperty("/dirty", false);
 
         // Attach property change listener to track changes
-        oGoalsCurrentModel.attachPropertyChange(oController._onGoalPropertyChange, oController);
+        if (!oController._bPropertyChangeAttached) {
+            oGoalsCurrentModel.attachPropertyChange(oController._onGoalPropertyChange, oController);
+            oController._bPropertyChangeAttached = true;
+        }
     }
     async onSaveGoal(): Promise<void> {
         const oController = this;
@@ -70,6 +85,7 @@ export default class GoalDetailController extends BaseController {
                 (oController.getOwnerComponent()?.getModel("goalsCurrent") as JSONModel)?.setProperty("/Goals", structuredClone(aGoals));
 
                 oGoalsCurrentModel.detachPropertyChange(oController._onGoalPropertyChange, oController);
+                oController._bPropertyChangeAttached = false;
             }
         } else {
             MessageToast.show("No changes to save.");
@@ -94,20 +110,13 @@ export default class GoalDetailController extends BaseController {
             }
             // Exit edit mode
             oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
+            oController._bPropertyChangeAttached = false;
             oUIModel?.setProperty("/dirty", false);
             oUIModel?.setProperty("/edit", !bEditMode);
         };
 
         if (bDirty) {
-            MessageBox.warning("Are you sure you want to discard your changes?", {
-                title: "Confirm",
-                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-                onClose: function (sAction: string) {
-                    if (sAction === MessageBox.Action.YES) {
-                        resetAndExit();
-                    }
-                }
-            })
+            oController._confirmDiscardAndReset(resetAndExit)
         } else {
             resetAndExit();
         }
@@ -121,30 +130,25 @@ export default class GoalDetailController extends BaseController {
         const oOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
         const oCurrent = oView?.getModel("goalsCurrent") as JSONModel;
         const oFCL = oView?.getParent()?.getParent() as FlexibleColumnLayout;
+        const resetAndExit = () => {
+            if (oOriginal) {
+                oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
+            }
+            // Exit edit mode
+            oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
+            oController._bPropertyChangeAttached = false;
+            oUIModel?.setProperty("/dirty", false);
+            oUIModel?.setProperty("/edit", !bEditMode);
+
+            // Check if FlexibleColumnLayout exists
+            if (oFCL && typeof oFCL.setLayout === "function") {
+                // Show only the begin column (list)
+                oFCL.setLayout("OneColumn");
+            }
+        }
 
         if (bDirty) {
-            MessageBox.warning("Are you sure you want to discard your changes?", {
-                title: "Confirm",
-                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-                onClose: function (sAction: string) {
-                    if (sAction === MessageBox.Action.YES) {
-                        // Reset goalsCurrent to original
-                        if (oOriginal) {
-                            oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
-                        }
-                        // Exit edit mode
-                        oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
-                        oUIModel?.setProperty("/dirty", false);
-                        oUIModel?.setProperty("/edit", !bEditMode);
-
-                        // Check if FlexibleColumnLayout exists
-                        if (oFCL && typeof oFCL.setLayout === "function") {
-                            // Show only the begin column (list)
-                            oFCL.setLayout("OneColumn");
-                        }
-                    }
-                }
-            })
+            oController._confirmDiscardAndReset(resetAndExit);
         } else {
             // Check if FlexibleColumnLayout exists
             if (oFCL && typeof oFCL.setLayout === "function") {
@@ -191,6 +195,7 @@ export default class GoalDetailController extends BaseController {
                 MessageToast.show(resourceBundle?.getText("goalDeletedMessage") || "Goal deleted successfully");
 
                 oGoalsCurrentModel.detachPropertyChange(oController._onGoalPropertyChange, oController);
+                oController._bPropertyChangeAttached = false;
 
                 let aGoals = oGoalsCurrentModel?.getProperty("/Goals") as Goal[] || [];
                 aGoals = aGoals.filter((goal: Goal) => goal.id !== sGoalId);
@@ -215,23 +220,23 @@ export default class GoalDetailController extends BaseController {
         }
     }
 
-    private _onGoalPropertyChange(): void {
+    private _onGoalPropertyChange(oEvent: Event): void {
         const oController = this;
         const oView = oController.getView();
         const oUIModel = oView?.getModel("ui") as JSONModel;
 
-        const sPath = oView?.getBindingContext("goalsCurrent")?.getPath();
-        if (!sPath) return;
+        const sPropertyName = oEvent.getParameter("path" as never) as keyof Goal;
+        const sObjectPath = oView?.getBindingContext("goalsCurrent")?.getPath() as string;
 
-        const oCurrent = oView?.getModel("goalsCurrent")?.getProperty(sPath) as Goal;
-        const aOriginalGoals = oController.getOwnerComponent()
+        if (!sObjectPath || !sPropertyName.includes("description")) return;
+
+        const vCurrent = oView?.getModel("goalsCurrent")?.getProperty(sObjectPath + "/" + sPropertyName) as keyof Goal;
+        const vOriginal = oController.getOwnerComponent()
             ?.getModel("goalsOriginal")
-            ?.getProperty("/Goals") as Goal[];
+            ?.getProperty(sObjectPath + "/" + sPropertyName) as keyof Goal;
 
-        const oOriginal = aOriginalGoals.find(g => g.id === oCurrent.id);
-        if (!oOriginal) return;
-
-        const hasChanges = Object.keys(oController.diff(oCurrent, oOriginal)).length > 0;
+        if (!vOriginal) return;
+        const hasChanges = vCurrent !== vOriginal;
         oUIModel.setProperty("/dirty", hasChanges);
     }
 }
