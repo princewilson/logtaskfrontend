@@ -6,6 +6,7 @@ import MessageToast from 'sap/m/MessageToast';
 import Dialog from 'sap/m/Dialog';
 import Fragment from 'sap/ui/core/Fragment';
 import { Goal } from '../types/Goal';
+import MessageBox from 'sap/m/MessageBox';
 
 export default class GoalDetailController extends BaseController {
     private _oDeleteGoalDialog?: Dialog;
@@ -82,18 +83,34 @@ export default class GoalDetailController extends BaseController {
         const oView = oController.getView();
         const oUIModel = oView?.getModel("ui") as JSONModel;
         const bEditMode = oUIModel?.getProperty("/edit");
-
-        // Reset goalsCurrent to original
+        const bDirty = oUIModel?.getProperty("/dirty");
         const oOriginal = oController.getOwnerComponent()?.getModel("goalsOriginal") as JSONModel;
         const oCurrent = oView?.getModel("goalsCurrent") as JSONModel;
-        if (oOriginal) {
-            oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
-        }
-        // Exit edit mode
 
-        oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
-        oUIModel?.setProperty("/dirty", false);
-        oUIModel?.setProperty("/edit", !bEditMode);
+        const resetAndExit = () => {
+            // Reset goalsCurrent to original
+            if (oOriginal) {
+                oCurrent?.setProperty("/Goals", structuredClone(oOriginal.getProperty("/Goals")));
+            }
+            // Exit edit mode
+            oCurrent?.detachPropertyChange(oController._onGoalPropertyChange, oController);
+            oUIModel?.setProperty("/dirty", false);
+            oUIModel?.setProperty("/edit", !bEditMode);
+        };
+
+        if (bDirty) {
+            MessageBox.warning("Are you sure you want to discard your changes?", {
+                title: "Confirm",
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                onClose: function (sAction: string) {
+                    if (sAction === MessageBox.Action.YES) {
+                        resetAndExit();
+                    }
+                }
+            })
+        } else {
+            resetAndExit();
+        }
     }
     onCloseDetail(): void {
         const oController = this;
