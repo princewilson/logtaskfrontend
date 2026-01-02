@@ -7,6 +7,9 @@
 	<ObjectPageLayout id="ObjectPageLayout" showTitleInHeaderContent="true" alwaysShowContentHeader="false" preserveHeaderStateOnScroll="false" headerContentPinnable="true" isChildPage="true" upperCaseAnchorBar="false">
 		<headerTitle>
 			<ObjectPageDynamicHeaderTitle>
+				<heading>
+					<m:Title text="{goalsCurrent>title}"/>
+				</heading>
 				<actions>
 					<m:Button icon="sap-icon://delete" tooltip="{i18n>deleteGoalButtonTooltip}" type="Transparent" press=".onDeleteGoal" visible="{ui>/edit}"/>
 					<m:Button icon="sap-icon://edit" tooltip="{i18n>editGoalButtonTooltip}" type="Transparent" press=".onEditGoal" visible="{= !%{ui>/edit} }"/>

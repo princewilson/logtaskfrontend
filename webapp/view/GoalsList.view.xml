@@ -22,28 +22,19 @@
 					}" class="sapFDynamicPageAlignContent" width="auto">
 							<columns>
 								<Column width="12em">
-									<Text text="Goal"/>
+									<Text text="Goals"/>
 								</Column>
 							</columns>
 							<items>
 								<ColumnListItem type="Navigation" press=".onGoalsListItemPress">
 									<cells>
-										<ObjectIdentifier title="{goalsCurrent>title}" text="{goalsCurrent>id}"/>
+										<ObjectIdentifier title="{goalsCurrent>title}" text="{goalsCurrent>description}"/>
 									</cells>
 								</ColumnListItem>
 							</items>
 						</Table>
 					</VBox>
 				</f:content>
-
-				<!-- DynamicPage Footer -->
-				<f:footer>
-					<OverflowToolbar>
-						<ToolbarSpacer/>
-						<Button type="Accept" text="Accept"/>
-						<Button type="Reject" text="Reject"/>
-					</OverflowToolbar>
-				</f:footer>
 			</f:DynamicPage>
 		</content>
 	</Page>
