@@ -19,7 +19,7 @@ import MessageToast from "sap/m/MessageToast";
  */
 export default class BaseController extends Controller {
     onInit(): void | undefined {
-        console.log("BaseController initialized");
+        console.log("BaseController onInit");
         const oController = this;
         // set i18n model on view
         const i18nModel = new ResourceModel({
@@ -28,10 +28,10 @@ export default class BaseController extends Controller {
         oController.getView()?.setModel(i18nModel, "i18n");
     }
     onBeforeRendering(): void | undefined {
-        console.log("BaseController preparing view");
+        console.log("BaseController onBeforeRendering");
     }
     onAfterRendering(): void | undefined {
-        console.log("BaseController after rendering");
+        console.log("BaseController onAfterRendering");
     }
     onExit(): void | undefined {
         console.log("BaseController exited");
@@ -39,7 +39,7 @@ export default class BaseController extends Controller {
     protected async ensureAuthenticated(): Promise<boolean> {
         const router = UIComponent.getRouterFor(this);
 
-        if (!window.Clerk?.user) {
+        if (!window.Clerk?.isSignedIn) {
             router.navTo("login");
             return false;
         }
@@ -48,22 +48,19 @@ export default class BaseController extends Controller {
     }
 
     _renderClerkComponent(): void {
+        console.log("BaseController _renderClerkComponent");
+        const oController = this;
         if (!window.Clerk) {
             console.error("ClerkJS is not loaded");
             return;
         }
-
-        if (!window.ClerkReady) {
-            console.error("ClerkJS promise not loaded");
-            return;
-        }
         const router = UIComponent.getRouterFor(this);
 
-        if (window.Clerk.user && window.Clerk.session && window.Clerk.session.status == "active") {
+        if (window.Clerk.isSignedIn) {
             // If already signed in, redirect to home page            
-            const user = document.getElementById("clerk-user");
+            const user = document.getElementById(oController.getView()?.byId("clerk-user")?.getId() || "");
             if (!user) {
-                console.info("Could not find Clerk root element");
+                console.info("Could not find Clerk user element");
                 return;
             }
 
@@ -71,13 +68,11 @@ export default class BaseController extends Controller {
             const div = document.createElement("div");
             user.appendChild(div);
 
-            // sometimes, the Clerk component takes time to load, so we use setTimeout
-            setTimeout(() => {
-                // Mount the user button
-                window.Clerk.mountUserButton(div, {
-                    afterSignOutUrl: CLERK_AFTER_SIGNOUT_URL
-                });
-            }, 1000);
+
+            // Mount the user button
+            window.Clerk.mountUserButton(div, {
+                afterSignOutUrl: CLERK_AFTER_SIGNOUT_URL
+            });
         } else {
             // Else, show sign-in form        
             const root = document.getElementById("clerk-root");
@@ -88,24 +83,22 @@ export default class BaseController extends Controller {
                 const div = document.createElement("div");
                 root.appendChild(div);
 
-                // sometimes, the Clerk component takes time to load, so we use setTimeout
-                setTimeout(() => {
-                    // Mount the sign-in form
-                    window.Clerk.mountSignIn(div, {
-                        routing: 'hash',
-                        fallbackRedirectUrl: CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
-                    });
-                }, 1000);
+
+                // Mount the sign-in form
+                window.Clerk.mountSignIn(div, {
+                    routing: 'hash',
+                    fallbackRedirectUrl: CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+                });
             }
         }
     }
 
     setHeaderTitle(i18nTitle: string): void {
         const oController = this;
-        const oModel = oController.getOwnerComponent()?.getModel() as JSONModel;
+        const oModel = oController.getOwnerComponent()?.getModel("customPageHeader") as JSONModel;
         const resourceBundle = (this.getView()?.getModel("i18n") as ResourceModel)?.getResourceBundle() as ResourceBundle;
         if (oModel) {
-            oModel.setProperty("/headerTitle", resourceBundle.getText(i18nTitle));
+            oModel.setProperty("/title", resourceBundle.getText(i18nTitle));
         }
     }
 
@@ -116,35 +109,41 @@ export default class BaseController extends Controller {
             const page = content[0] as Page;
             const customHeader = page.getCustomHeader();
             if (!customHeader) {
+                const oCustomHeader = new Bar({
+                    design: "Header",
+                    enableFlexBox: true,
+                    contentLeft: [
+                        new Button({
+                            type: "Back",
+                            press: oController.onNavBack.bind(oController)
+                        }),
+                        new Title({
+                            text: "{i18n>headerTitle}",
+                            level: "H6"
+                        })
+                    ],
+                    contentMiddle: [
+                        new Title({
+                            text: "{customPageHeader>/title}",
+                            layoutData: new FlexItemData({
+                                alignSelf: "Baseline",
+                                growFactor: 1
+                            })
+                        })
+                    ],
+                    contentRight: [
+                        new HTML(this.getView()?.createId("clerk-user"), {
+                            content: "<div class='clerk-user'></div>;"
+                        })
+                    ]
+                });
+                oCustomHeader.addEventDelegate({
+                    onAfterRendering: function () {
+                        oController._renderClerkComponent();
+                    }
+                })
                 page.setCustomHeader(
-                    new Bar({
-                        design: "Header",
-                        enableFlexBox: true,
-                        contentLeft: [
-                            new Button({
-                                type: "Back",
-                                press: oController.onNavBack.bind(oController)
-                            }),
-                            new Title({
-                                text: "{i18n>headerTitle}",
-                                level: "H6"
-                            })
-                        ],
-                        contentMiddle: [
-                            new Title({
-                                text: "{/headerTitle}",
-                                layoutData: new FlexItemData({
-                                    alignSelf: "Baseline",
-                                    growFactor: 1
-                                })
-                            })
-                        ],
-                        contentRight: [
-                            new HTML({
-                                content: "<div id='clerk-user'></div>;"
-                            })
-                        ]
-                    })
+                    oCustomHeader
                 );
             }
         }

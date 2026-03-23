@@ -21,9 +21,6 @@ export default class HomeController extends BaseController {
         const oController = this;
         oController.appendHeader();
         oController.setHeaderTitle("homePageTitle"); // Assuming "homePageTitle" is defined in i18n
-        window.ClerkReady.then(() => {
-            oController._renderClerkComponent();
-        });
     }
 
     onBeforeRendering(): void | undefined {
@@ -31,8 +28,6 @@ export default class HomeController extends BaseController {
     }
     onAfterRendering(): void | undefined {
         console.log("Rendering Home Page");
-        const oController = this;
-        oController._renderClerkComponent();
     }
 
     onExit(): void | undefined {
