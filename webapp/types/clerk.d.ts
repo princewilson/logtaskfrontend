@@ -23,4 +23,5 @@ export interface ClerkObject {
     session: SessionProps;
     mountSignIn: (node: HTMLElement, props?: SignInProps) => void;
     mountUserButton: (node: HTMLElement, props?: UserButtonProps) => void;
+    isSignedIn: boolean;
 }

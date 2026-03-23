@@ -37,9 +37,7 @@ export default class GoalsListController extends BaseController {
     }
     async _onRouteMatched(): Promise<void> {
         const oController = this;
-        oController.appendHeader();
         oController.setHeaderTitle("goalsListTitle"); // Assuming "goalsListTitle" is defined in i18n
-        oController._renderClerkComponent();
 
         let aGoals = await oController.request("/goals", "GET");
         if (aGoals?.success) {
@@ -67,7 +65,7 @@ export default class GoalsListController extends BaseController {
     onAfterRendering(): void | undefined {
         console.log("Rendering GoalsListController");
         const oController = this;
-        oController._renderClerkComponent();
+        oController.appendHeader();
     }
 
     onExit(): void | undefined {

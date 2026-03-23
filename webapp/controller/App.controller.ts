@@ -16,5 +16,14 @@ export default class AppController extends BaseController {
             });
             oController.getOwnerComponent()?.setModel(oUIModel, "ui");
         }
+
+        let oCustomPageHeader = oController?.getOwnerComponent()?.getModel("customPageHeader") as JSONModel || undefined;
+        if (!oCustomPageHeader) {
+            oCustomPageHeader = new JSONModel({
+                title: "",
+                showNavButton: false
+            });
+            oController.getOwnerComponent()?.setModel(oCustomPageHeader, "customPageHeader");
+        }
     }
 }

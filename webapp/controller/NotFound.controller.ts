@@ -22,7 +22,6 @@ export default class NotFoundController extends BaseController {
         const oController = this;
         oController.appendHeader();
         oController.setHeaderTitle("notFoundPageTitle"); // Assuming "notFoundPageTitle" is defined in i18n
-        oController._renderClerkComponent();
     }
 
     onBeforeRendering(): void | undefined {
@@ -30,10 +29,6 @@ export default class NotFoundController extends BaseController {
     }
     onAfterRendering(): void | undefined {
         console.log("Rendering Not Found Page");
-        const oController = this;
-        window.ClerkReady.then(() => {
-            oController._renderClerkComponent();
-        });
     }
     onExit(): void | undefined {
         console.log("NotFoundController exited");
