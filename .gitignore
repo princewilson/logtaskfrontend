@@ -32,6 +32,9 @@ coverage/
 .env.local
 .env.*.local
 
+# Runtime config (environment-specific, do not commit)
+webapp/config.json
+
 # IDE and editor settings
 .vscode/
 .idea/

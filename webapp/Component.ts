@@ -1,5 +1,5 @@
 import UIComponent from "sap/ui/core/UIComponent";
-import JSONModel from "sap/ui/model/json/JSONModel";
+import { initConfig } from "./constants";
 /**
  * @namespace LogTask
  */
@@ -8,9 +8,12 @@ export default class Component extends UIComponent {
         "interfaces": ["sap.ui.core.IAsyncContentCreation"],
         "manifest": "json"
     };
-    init(): void {
+    async init(): Promise<void> {
         // call the init function of the parent
         super.init();
+
+        // load runtime config before initialising the router
+        await initConfig();
 
         // creates the views based on URL/hash
         this.getRouter().initialize();
