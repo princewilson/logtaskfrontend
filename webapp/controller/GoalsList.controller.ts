@@ -23,13 +23,6 @@ export default class GoalsListController extends BaseController {
     onInit(): void | undefined {
         console.log("GoalsListController initialized");
         const oController = this;
-        oController.ensureAuthenticated().then((authenticated: boolean) => {
-            if (authenticated) {
-                console.log("User Authenticated");
-            } else {
-                console.log("Authentication failed");
-            }
-        });
 
         // Listen for route match
         const oRouter = oController.getRouter();
@@ -37,6 +30,10 @@ export default class GoalsListController extends BaseController {
     }
     async _onRouteMatched(): Promise<void> {
         const oController = this;
+
+        const authenticated = await oController.ensureAuthenticated();
+        if (!authenticated) return;
+
         oController.setHeaderTitle("goalsListTitle"); // Assuming "goalsListTitle" is defined in i18n
 
         let aGoals = await oController.request("/goals", "GET");

@@ -12,7 +12,7 @@
 						<OverflowToolbar class="sapFDynamicPageAlignContent">
 							<ToolbarSpacer/>
 							<SearchField search=".onSearch" width="17.5rem"/>
-							<OverflowToolbarButton icon="sap-icon://add" text="Add" type="Transparent" press=".onAddNewGoal" visible="{mode>/create}"/>
+							<OverflowToolbarButton icon="sap-icon://add" text="Add" type="Transparent" press=".onAddNewGoal" visible="{ui>/canCreate}"/>
 						</OverflowToolbar>
 						<Table id="goalsTable" inset="false" items="{
 						path: 'goalsCurrent>/Goals',
