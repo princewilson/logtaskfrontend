@@ -228,14 +228,14 @@ export default class GoalDetailController extends BaseController {
         const sPropertyName = oEvent.getParameter("path" as never) as keyof Goal;
         const sObjectPath = oView?.getBindingContext("goalsCurrent")?.getPath() as string;
 
-        if (!sObjectPath || !sPropertyName.includes("description")) return;
+        if (!sObjectPath || !sPropertyName) return;
 
         const vCurrent = oView?.getModel("goalsCurrent")?.getProperty(sObjectPath + "/" + sPropertyName) as keyof Goal;
         const vOriginal = oController.getOwnerComponent()
             ?.getModel("goalsOriginal")
             ?.getProperty(sObjectPath + "/" + sPropertyName) as keyof Goal;
 
-        if (!vOriginal) return;
+        if (vOriginal === undefined) return;
         const hasChanges = vCurrent !== vOriginal;
         oUIModel.setProperty("/dirty", hasChanges);
     }
