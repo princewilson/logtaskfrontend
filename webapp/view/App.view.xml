@@ -5,4 +5,5 @@
 	<Shell>
 		<App id="app" busy="{ui>/busy}" />
 	</Shell>
+	<core:Fragment fragmentName="LogTask.view.fragment.Chat" type="XML"/>
 </mvc:View>

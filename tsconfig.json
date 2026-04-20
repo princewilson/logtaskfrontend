@@ -8,8 +8,12 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "useUnknownInCatchVariables": true,
+    "ignoreDeprecations": "6.0",
     "rootDir": "webapp",
     "baseUrl": "./",
+    "types": [
+      "openui5"
+    ],
     "paths": {
       "ui5/walkthrough/*": [
         "webapp/*"

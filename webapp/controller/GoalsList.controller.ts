@@ -1,5 +1,5 @@
 import FlexibleColumnLayout from 'sap/f/FlexibleColumnLayout';
-import BaseController from './Base.controller'
+import BaseController from './Base.controller';
 import { LayoutType } from 'sap/f/library';
 import Event from 'sap/ui/base/Event';
 import ManagedObject from 'sap/ui/base/ManagedObject';

@@ -1,0 +1,46 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout">
+
+    <!-- Chat Panel -->
+    <VBox id="chatPanel" class="chatPanel" visible="{chat>/open}">
+        <!-- Header -->
+        <Toolbar class="chatPanelHeader">
+            <Title text="AI Assistant" level="H6" class="chatPanelTitle"/>
+            <ToolbarSpacer/>
+            <Button icon="sap-icon://decline" type="Transparent" press=".onChatClose" tooltip="Close"/>
+        </Toolbar>
+
+        <!-- Messages -->
+        <ScrollContainer id="chatScrollContainer" height="100%" vertical="true" class="chatMessages">
+            <List id="chatMessagesList" showSeparators="None" items="{chat>/messages}">
+                <CustomListItem>
+                    <VBox class="chatBubbleWrapperUser" visible="{= ${chat>role} === 'user' }">
+                        <Text text="{chat>content}" wrapping="true" class="chatBubbleUser"/>
+                    </VBox>
+                    <VBox class="chatBubbleWrapperAssistant" visible="{= ${chat>role} !== 'user' }">
+                        <Text text="{chat>content}" wrapping="true" class="chatBubbleAssistant"/>
+                    </VBox>
+                </CustomListItem>
+            </List>
+        </ScrollContainer>
+
+        <!-- Input Bar -->
+        <Toolbar class="chatInputBar">
+            <Input id="chatInput" placeholder="Ask me anything..." value="{chat>/input}" width="100%" submit=".onChatSend"/>
+            <Button icon="sap-icon://paper-plane" type="Emphasized" press=".onChatSend" enabled="{= !!%{chat>/input} }" tooltip="Send"/>
+        </Toolbar>
+    </VBox>
+
+    <!-- Floating Action Button -->
+    <Button
+        id="chatFAB"
+        icon="sap-icon://discussion"
+        type="Emphasized"
+        press=".onChatOpen"
+        tooltip="AI Assistant"
+        visible="{= !%{chat>/open} }"
+        class="chatFAB"/>
+
+</core:FragmentDefinition>
