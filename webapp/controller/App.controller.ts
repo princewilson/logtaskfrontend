@@ -37,7 +37,7 @@ export default class AppController extends BaseController {
             oChatModel = new JSONModel({
                 open: false,
                 input: "",
-                messages: [{ role: "assistant", content: "Hello! How can I assist you today?" }]
+                messages: []
             });
             oController.getOwnerComponent()?.setModel(oChatModel, "chat");
         }
@@ -90,10 +90,11 @@ export default class AppController extends BaseController {
         const oController = this;
         setTimeout(() => {
             const oScroll = oController.byId("chatScrollContainer") as ScrollContainer;
-            if (oScroll) {
-                const oDomRef = oScroll.getDomRef();
-                if (oDomRef) oDomRef.scrollTop = oDomRef.scrollHeight;
-            }
-        }, 100);
+            if (!oScroll) return;
+            const oDomRef = oScroll.getDomRef();
+            if (!oDomRef) return;
+            const oScrollable = (oDomRef.querySelector(".sapMScrollContScroll") as HTMLElement) || oDomRef;
+            oScroll.scrollTo(0, oScrollable.scrollHeight, 0);
+        }, 150);
     }
 }
