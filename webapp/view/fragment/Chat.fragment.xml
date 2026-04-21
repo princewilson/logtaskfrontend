@@ -4,7 +4,7 @@
     xmlns:layout="sap.ui.layout">
 
     <!-- Chat Panel -->
-    <VBox id="chatPanel" class="chatPanel" visible="{chat>/open}">
+    <VBox id="chatPanel" class="chatPanel" renderType="Bare" visible="{chat>/open}">
         <!-- Header -->
         <Toolbar class="chatPanelHeader">
             <Title text="AI Assistant" level="H6" class="chatPanelTitle"/>
@@ -20,7 +20,7 @@
                         <Text text="{chat>content}" wrapping="true" class="chatBubbleUser"/>
                     </VBox>
                     <VBox class="chatBubbleWrapperAssistant" visible="{= ${chat>role} !== 'user' }">
-                        <Text text="{chat>content}" wrapping="true" class="chatBubbleAssistant"/>
+                        <FormattedText htmlText="{chat>content}" class="chatBubbleAssistant"/>
                     </VBox>
                 </CustomListItem>
             </List>
@@ -28,8 +28,7 @@
 
         <!-- Input Bar -->
         <Toolbar class="chatInputBar">
-            <Input id="chatInput" placeholder="Ask me anything..." value="{chat>/input}" width="100%" submit=".onChatSend"/>
-            <Button icon="sap-icon://paper-plane" type="Emphasized" press=".onChatSend" enabled="{= !!%{chat>/input} }" tooltip="Send"/>
+            <Input id="chatInput" placeholder="Ask me anything..." value="{chat>/input}" width="100%" submit=".onChatSend"/>            
         </Toolbar>
     </VBox>
 

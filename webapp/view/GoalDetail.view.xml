@@ -26,7 +26,7 @@
 					<form:SimpleForm layout="ResponsiveGridLayout" editable="true" class="centeredDialogContent" labelSpanXL="2" labelSpanL="2" labelSpanM="2" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">
 						<form:content>
 							<m:Label text="{i18n>goalDescriptionLabel}"/>
-							<m:Input value="{goalsCurrent>description}" editable="{= %{ui>/edit} }"/>
+							<m:TextArea value="{goalsCurrent>description}" editable="{= %{ui>/edit} }"/>
 						</form:content>
 					</form:SimpleForm>
 				</m:VBox>

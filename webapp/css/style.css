@@ -49,7 +49,8 @@ div.clerk-user {
 
 /* Chat Messages Area */
 .chatMessages {
-    flex: 1;
+    flex: 1 1 0;
+    min-height: 0;
     padding: 0.75rem;
     overflow-y: auto;
 }
@@ -86,7 +87,13 @@ div.clerk-user {
 
 /* Chat Input Bar */
 .chatInputBar.sapMTB {
+    flex-shrink: 0;
     padding: 0.5rem;
     border-top: 1px solid var(--sapField_BorderColor, #ccc);
     gap: 0.5rem;
+}
+
+/* Ensure header never shrinks */
+.chatPanelHeader.sapMTB {
+    flex-shrink: 0;
 }
