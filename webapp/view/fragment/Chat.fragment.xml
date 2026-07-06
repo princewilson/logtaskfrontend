@@ -16,11 +16,22 @@
         <ScrollContainer id="chatScrollContainer" height="100%" vertical="true" class="chatMessages">
             <List id="chatMessagesList" showSeparators="None" items="{chat>/messages}">
                 <CustomListItem>
-                    <VBox class="chatBubbleWrapperUser" visible="{= ${chat>role} === 'user' }">
+                    <VBox class="chatBubbleWrapperUser" renderType="Bare" visible="{= ${chat>role} === 'user' }">
                         <Text text="{chat>content}" wrapping="true" class="chatBubbleUser"/>
                     </VBox>
-                    <VBox class="chatBubbleWrapperAssistant" visible="{= ${chat>role} !== 'user' }">
-                        <FormattedText htmlText="{chat>content}" class="chatBubbleAssistant"/>
+                    <VBox class="chatBubbleWrapperAssistant" renderType="Bare" visible="{= ${chat>role} !== 'user' }">
+                        <FormattedText htmlText="{chat>html}" class="chatBubbleAssistant"/>
+                        <!-- Goal confirmation card: AI proposes, user confirms. Nothing is saved until Confirm is clicked. -->
+                        <VBox class="chatConfirmCard" renderType="Bare" visible="{= !!${chat>confirmation} }">
+                            <Title text="{chat>confirmation/title}" level="H6" class="chatConfirmTitle"/>
+                            <Text text="{chat>confirmation/description}" wrapping="true" class="chatConfirmDescription"/>
+                            <HBox class="chatConfirmActions" visible="{= ${chat>confirmation/status} === 'pending' }">
+                                <Button text="Confirm" type="Emphasized" icon="sap-icon://accept" press=".onChatConfirmGoal"/>
+                                <Button text="Cancel" type="Transparent" icon="sap-icon://decline" press=".onChatCancelGoal" class="chatConfirmCancelBtn"/>
+                            </HBox>
+                            <Text text="Added to your goals" class="chatConfirmStatus chatConfirmStatusOk" visible="{= ${chat>confirmation/status} === 'confirmed' }"/>
+                            <Text text="Not added" class="chatConfirmStatus chatConfirmStatusCancelled" visible="{= ${chat>confirmation/status} === 'cancelled' }"/>
+                        </VBox>
                     </VBox>
                 </CustomListItem>
             </List>
